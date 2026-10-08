@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Ranking Content for Review: FlyRank ML Internship</title>
+
+<meta name="description"
+      content="Research paper on refresh and content opportunity scoring using the FlyRank ML Internship dataset.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Public+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet">
+
+<style>
+
+:root{
+  --bg:#F5F6F8;
+  --surface:#FFFFFF;
+  --ink:#18212B;
+  --muted:#5A6573;
+  --rule:#D8DDE4;
+  --accent:#1C5D66;
+  --base:#8A96A6;
+
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+@media (prefers-color-scheme:dark){
+
+  :root{
+    --bg:#12171D;
+    --surface:#1A2129;
+    --ink:#E7EBF0;
+    --muted:#9AA6B4;
+    --rule:#2C3640;
+    --accent:#6FC0CB;
+    --base:#76828F;
+  }
+
+}
+
+*{
+  box-sizing:border-box
+}
+
+html{
+  scroll-behavior:smooth;
+  scroll-padding-top:1.5rem
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:1.0625rem;
+  line-height:1.7
+}
+
+a{
+  color:var(--accent);
+  text-underline-offset:3px
+}
+
+a:focus-visible,
+button:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:15rem minmax(0,1fr);
+  gap:3rem;
+  max-width:68rem;
+  margin:0 auto;
+  padding:3rem 1.5rem 5rem
+}
+
+nav.toc{
+  position:sticky;
+  top:2rem;
+  align-self:start;
+  font-family:var(--sans);
+  font-size:.875rem
+}
+
+nav.toc p{
+  margin:0 0 .75rem;
+  font-weight:700;
+  color:var(--muted)
+}
+
+nav.toc ol{
+  list-style:none;
+  margin:0;
+  padding:0;
+  border-left:2px solid var(--rule)
+}
+
+nav.toc a{
+  display:block;
+  padding:.3rem 0 .3rem 1rem;
+  margin-left:-2px;
+  border-left:2px solid transparent;
+  color:var(--muted);
+  text-decoration:none
+}
+
+nav.toc a:hover,
+nav.toc a.on{
+  color:var(--ink);
+  border-left-color:var(--accent)
+}
+
+main{
+  max-width:42rem
+}
+
+header.title h1{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:clamp(1.9rem,4.5vw,2.75rem);
+  line-height:1.15;
+  letter-spacing:-.01em;
+  margin:0 0 1rem
+}
+
+.byline{
+  font-family:var(--sans);
+  font-size:.9375rem;
+  color:var(--muted);
+  margin:0 0 2.5rem
+}
+
+section{
+  margin:0 0 3rem
+}
+
+h2{
+  font-family:var(--sans);
+  font-size:1.4rem;
+  line-height:1.3;
+  margin:0 0 .75rem;
+  padding-top:.5rem;
+  border-top:1px solid var(--rule)
+}
+
+h2 span{
+  color:var(--muted);
+  font-weight:400;
+  margin-right:.5rem
+}
+
+h3{
+  font-family:var(--sans);
+  font-size:1.05rem;
+  margin:1.5rem 0 .25rem
+}
+
+p{
+  margin:.75rem 0
+}
+
+.abstract{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-left:4px solid var(--accent);
+  padding:1.1rem 1.4rem;
+  border-radius:4px
+}
+
+.abstract p{
+  margin:0
+}
+
+figure{
+  margin:1.5rem 0;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:4px;
+  padding:1rem
+}
+
+figcaption{
+  font-family:var(--sans);
+  font-size:.85rem;
+  color:var(--muted);
+  margin-top:.5rem
+}
+
+#fig svg{
+  width:100%;
+  height:auto;
+  display:block
+}
+
+#fig .empty{
+  font-family:var(--sans);
+  color:var(--muted);
+  padding:1.5rem 0;
+  text-align:center
+}
+
+.legend{
+  display:flex;
+  gap:1.25rem;
+  font-family:var(--sans);
+  font-size:.85rem;
+  margin-bottom:.5rem
+}
+
+.legend i{
+  display:inline-block;
+  width:.8rem;
+  height:.8rem;
+  border-radius:2px;
+  margin-right:.4rem;
+  vertical-align:-1px
+}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-family:var(--sans);
+  font-size:.9rem;
+  margin:1rem 0
+}
+
+th,
+td{
+  text-align:left;
+  padding:.5rem .6rem;
+  border-bottom:1px solid var(--rule);
+  vertical-align:top
+}
+
+th{
+  font-weight:700
+}
+
+.tablewrap{
+  overflow-x:auto
+}
+
+code{
+  font-size:.9em;
+  background:var(--surface);
+  padding:.1em .35em;
+  border-radius:3px;
+  border:1px solid var(--rule)
+}
+
+.metric{
+  font-family:var(--sans);
+  font-weight:700;
+  color:var(--accent)
+}
+
+footer{
+  font-family:var(--sans);
+  font-size:.85rem;
+  color:var(--muted);
+  border-top:1px solid var(--rule);
+  padding-top:1rem
+}
+
+@media (max-width:56rem){
+
+  .layout{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+    padding-top:1.5rem
+  }
+
+  nav.toc{
+    position:static
+  }
+
+  nav.toc ol{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.25rem 1rem;
+    border:0
+  }
+
+  nav.toc a{
+    border:0;
+    padding:.1rem 0;
+    margin:0
+  }
+
+}
+
+@media (prefers-reduced-motion:reduce){
+
+  html{
+    scroll-behavior:auto
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="layout">
+
+<nav class="toc" aria-label="Contents">
+
+  <p>Contents</p>
+
+  <ol>
+
+    <li><a href="#abstract">Abstract</a></li>
+
+    <li><a href="#intro">Problem statement</a></li>
+
+    <li><a href="#data">Data</a></li>
+
+    <li><a href="#method">Methodology</a></li>
+
+    <li><a href="#results">Results</a></li>
+
+    <li><a href="#limits">Limitations</a></li>
+
+    <li><a href="#recs">Recommendations</a></li>
+
+    <li><a href="#repro">Reproducibility</a></li>
+
+    <li><a href="#credit">Acknowledgments</a></li>
+
+  </ol>
+
+</nav>
+
+
+<main>
+
+<header class="title">
+
+  <h1>
+    Ranking Content for Review Using Historical Performance and Freshness Signals
+  </h1>
+
+  <p class="byline">
+    Maxine Mwangi · FlyRank ML Internship · Machine Learning track · October 2026
+  </p>
+
+</header>
+
+
+<section id="abstract">
+
+  <h2>Abstract</h2>
+
+  <div class="abstract">
+
+    <p>
+      This study investigates how a content team can prioritize pages for review when only a limited number of pages can be assessed in each cycle.
+      The work focuses on Refresh / Content Opportunity Scoring and uses historical content-performance and freshness signals to produce a ranked review queue.
+      The analysis uses the anonymized FlyRank dataset, constructs an observed decline-score outcome from the measured trend percentage, compares a two-signal baseline against a gradient-boosting regression model, and evaluates both approaches using a client-grouped train/test split.
+      The final model and baseline are compared on the same held-out clients using NDCG@100, Precision@100, and Spearman correlation, with the exact values loaded from the capstone metrics file when available.
+      The resulting ranking can be used as decision-support evidence to help a content team identify pages for manual review, while avoiding the claim that refreshing a page will necessarily improve its performance.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="intro">
+
+  <h2><span>1</span>Introduction and problem statement</h2>
+
+  <p>
+    Content teams often have more pages that could be reviewed than they have time to evaluate.
+    A practical question is therefore which pages should be examined first when review capacity is limited.
+    This project addresses that decision through a Refresh / Content Opportunity Scoring approach that ranks content according to signals associated with observed performance decline.
+  </p>
+
+  <p>
+    The research question is:
+    <strong>Which content pages should be prioritized for review based on measured performance, content freshness, and search-position signals?</strong>
+  </p>
+
+  <p>
+    The objective is not to automate the decision to refresh a page.
+    Instead, the objective is to provide a ranked queue that helps a content team decide where manual investigation should begin.
+  </p>
+
+</section>
+
+
+<section id="data">
+
+  <h2><span>2</span>Data</h2>
+
+  <p>
+    This work uses the anonymized FlyRank ML Internship dataset stored at
+    <code>data/raw/content_refresh_anonymized.csv</code>.
+    The dataset contains 30,000 content records and uses pseudonymized client and content identifiers.
+    The available fields include historical 90-day performance measures, recent performance measures, content age, freshness information, search-position information, engagement measures, and trend information.
+  </p>
+
+  <p>
+    For this capstone, the analysis operates at the content-item level and uses
+    <code>client_id</code> as the grouping variable.
+    The observed trend percentage is converted into a temporary outcome proxy,
+    <code>decline_score = -trend_pct</code>, so that larger values represent larger observed negative trends.
+  </p>
+
+  <h3>What was excluded, and why</h3>
+
+  <p>
+    Client and content identifiers are retained only for grouping, deduplication, and identification.
+    They are not used as predictive features.
+    The original <code>trend_pct</code> field is used only to construct the outcome proxy and is not included among the model features.
+    Rows without a usable outcome or without the required model features are excluded from the modeling dataset.
+    No client names, domains, URLs, or other identifying information are used in the analysis.
+  </p>
+
+</section>
+
+
+<section id="method">
+
+  <h2><span>3</span>Methodology</h2>
+
+
+  <h3>Assumptions</h3>
+
+  <p>
+    The analysis assumes that the historical content and performance signals provide useful information for prioritizing pages for review.
+    It also assumes that pages from the same client may share characteristics, making client-level grouping important during validation.
+    Finally, the ranking is treated as decision support rather than a causal estimate of the effect of refreshing content.
+  </p>
+
+
+  <h3>Label</h3>
+
+  <p>
+    The outcome used in this capstone is <code>decline_score</code>, constructed as the negative of the dataset's measured
+    <code>trend_pct</code>.
+    Consequently, a larger decline score represents a more negative observed trend.
+    This is an observed-trend proxy rather than a genuinely future-window outcome, so the resulting ranking should not be interpreted as a guaranteed prediction of future traffic or ranking loss.
+  </p>
+
+
+  <h3>Features</h3>
+
+  <div class="tablewrap">
+
+    <table>
+
+      <thead>
+
+        <tr>
+          <th>Feature</th>
+          <th>Why it is used</th>
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td><code>impressions_90d</code></td>
+
+          <td>
+            Represents measured search visibility accumulated over the available 90-day period.
+          </td>
+        </tr>
+
+        <tr>
+          <td><code>clicks_90d</code></td>
+
+          <td>
+            Represents measured clicks accumulated over the available 90-day period.
+          </td>
+        </tr>
+
+        <tr>
+          <td><code>content_age_days</code></td>
+
+          <td>
+            Represents how long the content has existed and provides an indication of content maturity.
+          </td>
+        </tr>
+
+        <tr>
+          <td><code>days_since_last_update</code></td>
+
+          <td>
+            Represents how long the page has gone without an update and provides a direct freshness signal.
+          </td>
+        </tr>
+
+        <tr>
+          <td><code>avg_position</code></td>
+
+          <td>
+            Represents measured average search position, with larger values indicating weaker search position.
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <h3>Baseline</h3>
+
+  <p>
+    The baseline ranks pages using two signals:
+    <code>days_since_last_update</code> and <code>avg_position</code>.
+    Each signal is converted to a percentile score, with higher values treated as worse, and the two scores are combined using equal 50/50 weighting.
+    The resulting baseline is associated with the reason code
+    <code>STALE_OR_LOW_RANK</code>
+    and the action label
+    <strong>Refresh content</strong>.
+  </p>
+
+
+  <h3>Model</h3>
+
+  <p>
+    The machine-learning model is a
+    <code>HistGradientBoostingRegressor</code>
+    trained using the five features above.
+    The model uses a maximum depth of 4, a learning rate of 0.05, and 200 boosting iterations.
+    The model produces a continuous score that is used to rank pages from highest to lowest review priority.
+  </p>
+
+
+  <h3>Validation design and leakage checks</h3>
+
+  <p>
+    Validation uses a grouped 75/25 train-test split with <code>client_id</code> as the grouping variable.
+    This prevents pages from the same client from appearing in both training and testing data.
+    The model and baseline are evaluated on exactly the same held-out rows.
+  </p>
+
+  <p>
+    Three basic leakage checks are used.
+    First, a feature-name screen checks that outcome-related or future-looking fields are not included among the model features.
+    Second, a shuffled-label test randomly rearranges the outcome values and checks whether performance falls toward chance.
+    Third, a too-good-to-be-true threshold flags unusually strong ranking performance for manual investigation.
+  </p>
+
+  <p>
+    Permutation importance is also used after model evaluation to inspect which of the five input features contributes most strongly to the fitted model's predictions.
+    These checks provide safeguards against obvious evaluation problems, but they do not prove that the analysis is completely free from all possible forms of leakage or bias.
+  </p>
+
+</section>
+
+
+<section id="results">
+
+  <h2><span>4</span>Results</h2>
+
+  <p id="resultsText">
+    The model and the two-signal baseline are evaluated on the same held-out clients.
+    Higher values are better for NDCG@100, Precision@100, and Spearman correlation.
+    The exact comparison below is populated directly from
+    <code>work/outputs/capstone_metrics.json</code>.
+  </p>
+
+
+  <figure>
+
+    <div class="legend">
+
+      <span>
+        <i style="background:var(--base)"></i>
+        Baseline rule
+      </span>
+
+      <span>
+        <i style="background:var(--accent)"></i>
+        Model
+      </span>
+
+    </div>
+
+
+    <div id="fig">
+
+      <p class="empty">
+        Results will appear here once
+        <code>work/outputs/capstone_metrics.json</code>
+        is available.
+      </p>
+
+    </div>
+
+
+    <figcaption id="figcap">
+      Figure 1. Model versus baseline on the same held-out clients.
+    </figcaption>
+
+  </figure>
+
+
+  <div id="metricsTable"></div>
+
+  <div id="shuf"></div>
+
+</section>
+
+
+<section id="limits">
+
+  <h2><span>5</span>Limitations and honest framing</h2>
+
+  <p>
+    These results are observed on one anonymized dataset and should therefore be treated as directional.
+    They support content-review decisions but do not establish that a page will decline in the future or that refreshing a page will cause improved performance.
+  </p>
+
+  <p>
+    First, the outcome is based on an observed performance trend rather than a genuine future-window outcome.
+    The current capstone therefore should not be interpreted as a production-ready forecasting model.
+  </p>
+
+  <p>
+    Second, the dataset represents a historical snapshot and cannot capture every factor affecting content performance, including changes in search demand, seasonality, competitor activity, content quality, technical issues, or external events.
+  </p>
+
+  <p>
+    Third, the analysis is observational.
+    A high score indicates that a page deserves attention according to the available signals, but it does not demonstrate that taking the recommended action will improve the page.
+  </p>
+
+  <p>
+    Fourth, the model does not explain Google's ranking algorithm.
+    Search position is treated as an observed performance signal rather than evidence about the internal operation of a search engine.
+  </p>
+
+  <p>
+    Finally, the ranked queue should be combined with human review.
+    Pages may be incorrectly prioritized when their historical measurements are unusual, incomplete, seasonal, noisy, or affected by information that is not represented in the dataset.
+  </p>
+
+</section>
+
+
+<section id="recs">
+
+  <h2><span>6</span>Ranked recommendations</h2>
+
+  <p>
+    The primary recommendation is to use the highest-ranked pages as the starting point for manual content review.
+    The action label associated with the baseline is
+    <strong>Refresh content</strong>,
+    while the corresponding reason code is
+    <code>STALE_OR_LOW_RANK</code>.
+  </p>
+
+  <p>
+    The ranking should be interpreted as a prioritization queue rather than an automatic action list.
+    Before refreshing a page, the team should check whether the decline signal is meaningful, whether the content is still relevant, whether search demand has changed, and whether another explanation better accounts for the observed performance.
+  </p>
+
+
+  <div class="tablewrap">
+
+    <table>
+
+      <thead>
+
+        <tr>
+          <th>Priority</th>
+          <th>Action</th>
+          <th>Reason code</th>
+          <th>What would make it wrong</th>
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td>1</td>
+
+          <td>
+            Refresh content
+          </td>
+
+          <td>
+            <code>STALE_OR_LOW_RANK</code>
+          </td>
+
+          <td>
+            The page may be intentionally stable, seasonal, affected by changing search demand, or experiencing a decline caused by an external factor.
+          </td>
+        </tr>
+
+
+        <tr>
+          <td>2</td>
+
+          <td>
+            Refresh content
+          </td>
+
+          <td>
+            <code>STALE_OR_LOW_RANK</code>
+          </td>
+
+          <td>
+            The measured signals may not represent the current state of the page or may contain insufficient historical information.
+          </td>
+        </tr>
+
+
+        <tr>
+          <td>3</td>
+
+          <td>
+            Refresh content
+          </td>
+
+          <td>
+            <code>STALE_OR_LOW_RANK</code>
+          </td>
+
+          <td>
+            A high ranking score does not establish that refreshing the page will improve its future performance.
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+
+<section id="repro">
+
+  <h2><span>7</span>Reproducibility</h2>
+
+  <p>
+    The project code is maintained in the public repository:
+    <a href="https://github.com/MaxineMwangi/flyrank"
+       target="_blank"
+       rel="noopener">
+      github.com/MaxineMwangi/flyrank
+    </a>.
+  </p>
+
+  <p>
+    The capstone notebook is located at
+    <code>work/notebooks/capstone.ipynb</code>.
+    The weekly notebooks used as supporting material are stored in
+    <code>work/notebooks/</code>.
+  </p>
+
+  <p>
+    The evaluation results are written to
+    <code>work/outputs/capstone_metrics.json</code>,
+    while the ranked review queue is exported to
+    <code>work/outputs/capstone_ranked_actions.csv</code>.
+  </p>
+
+  <p>
+    Raw data and ranked CSV outputs are not published.
+    The analysis can therefore be reproduced within the project environment without exposing client-level information.
+  </p>
+
+</section>
+
+
+<section id="credit">
+
+  <h2><span>8</span>Acknowledgments and data credit</h2>
+
+  <p>
+    This work was completed as part of the FlyRank ML Internship and uses the anonymized
+    FlyRank ML Internship dataset.
+    The project follows the internship's focus on practical machine-learning decision support for content operations.
+  </p>
+
+  <p>
+    Data and internship context:
+    <a href="https://flyrank.ai"
+       target="_blank"
+       rel="noopener">
+      flyrank.ai
+    </a>.
+  </p>
+
+</section>
+
+
+<footer>
+
+  This paper reports observed, directional results for decision support.
+  It makes no claim about causal refresh impact, future search performance,
+  or the internal operation of Google's ranking systems.
+
+</footer>
+
+</main>
+
+</div>
+
+
+<script>
+
+/*
+ * Results are loaded directly from the capstone output.
+ *
+ * Expected file:
+ * work/outputs/capstone_metrics.json
+ */
+
+var METRICS_URL = "work/outputs/capstone_metrics.json";
+
+
+(function drawFigure(){
+
+  var box = document.getElementById("fig");
+
+  fetch(METRICS_URL)
+
+    .then(function(r){
+
+      if(!r.ok){
+        throw new Error("Metrics file unavailable");
+      }
+
+      return r.json();
+
+    })
+
+    .then(function(d){
+
+      var names = Object.keys(d.metrics.model);
+
+      var W = 640;
+      var H = 300;
+
+      var m = {
+        t:16,
+        r:16,
+        b:48,
+        l:44
+      };
+
+      var pw = W - m.l - m.r;
+      var ph = H - m.t - m.b;
+
+      var vals = [];
+
+      names.forEach(function(k){
+
+        vals.push(
+          d.metrics.baseline[k],
+          d.metrics.model[k]
+        );
+
+      });
+
+
+      var lo = Math.min(
+        0,
+        Math.min.apply(null, vals)
+      );
+
+      var hi = Math.max(
+        1,
+        Math.max.apply(null, vals)
+      );
+
+
+      var y = function(v){
+
+        return m.t +
+          ph *
+          (1 - (v-lo)/(hi-lo));
+
+      };
+
+
+      var s =
+        '<svg viewBox="0 0 ' +
+        W +
+        ' ' +
+        H +
+        '" role="img" aria-label="Bar chart of baseline versus model metrics">';
+
+
+      [0,.25,.5,.75,1].forEach(function(t){
+
+        var v =
+          lo +
+          (hi-lo) * t;
+
+        s +=
+          '<line x1="' +
+          m.l +
+          '" x2="' +
+          (W-m.r) +
+          '" y1="' +
+          y(v) +
+          '" y2="' +
+          y(v) +
+          '" stroke="var(--rule)"/>';
+
+        s +=
+          '<text x="' +
+          (m.l-8) +
+          '" y="' +
+          (y(v)+4) +
+          '" text-anchor="end" font-size="11" fill="var(--muted)" font-family="Public Sans,sans-serif">' +
+          v.toFixed(2) +
+          '</text>';
+
+      });
+
+
+      var gw = pw / names.length;
+
+      var bw = Math.min(
+        46,
+        gw/3
+      );
+
+
+      names.forEach(function(k,i){
+
+        var cx =
+          m.l +
+          gw*i +
+          gw/2;
+
+
+        [
+          ["baseline","var(--base)",-bw-2],
+          ["model","var(--accent)",2]
+        ]
+
+        .forEach(function(b){
+
+          var v =
+            d.metrics[b[0]][k];
+
+          var top =
+            Math.min(
+              y(v),
+              y(0)
+            );
+
+          var h =
+            Math.abs(
+              y(v)-y(0)
+            );
+
+
+          s +=
+            '<rect x="' +
+            (cx+b[2]) +
+            '" y="' +
+            top +
+            '" width="' +
+            bw +
+            '" height="' +
+            Math.max(h,1) +
+            '" fill="' +
+            b[1] +
+            '" rx="2">' +
+
+            '<title>' +
+            b[0] +
+            ' ' +
+            k +
+            ': ' +
+            v.toFixed(3) +
+            '</title>' +
+
+            '</rect>';
+
+
+          s +=
+            '<text x="' +
+            (cx+b[2]+bw/2) +
+            '" y="' +
+            (top-5) +
+            '" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="Public Sans,sans-serif">' +
+            v.toFixed(2) +
+            '</text>';
+
+        });
+
+
+        s +=
+          '<text x="' +
+          cx +
+          '" y="' +
+          (H-m.b+22) +
+          '" text-anchor="middle" font-size="12" fill="var(--ink)" font-family="Public Sans,sans-serif">' +
+          k +
+          '</text>';
+
+      });
+
+
+      s += '</svg>';
+
+      box.innerHTML = s;
+
+
+      document.getElementById("figcap").textContent =
+        "Figure 1. Model versus baseline on the same held-out clients (K = " +
+        d.k +
+        "; " +
+        d.n_test +
+        " test rows, " +
+        d.n_train +
+        " training rows). Split: " +
+        d.split +
+        ".";
+
+
+      /*
+       * Create a numerical results table.
+       */
+
+      var table =
+        '<div class="tablewrap">' +
+        '<table>' +
+        '<thead>' +
+        '<tr>' +
+        '<th>Metric</th>' +
+        '<th>Baseline</th>' +
+        '<th>Model</th>' +
+        '<th>Difference</th>' +
+        '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+
+      names.forEach(function(k){
+
+        var baseline =
+          d.metrics.baseline[k];
+
+        var model =
+          d.metrics.model[k];
+
+        var difference =
+          model - baseline;
+
+
+        table +=
+          '<tr>' +
+          '<td>' +
+          k +
+          '</td>' +
+          '<td>' +
+          baseline.toFixed(3) +
+          '</td>' +
+          '<td class="metric">' +
+          model.toFixed(3) +
+          '</td>' +
+          '<td>' +
+          (difference >= 0 ? "+" : "") +
+          difference.toFixed(3) +
+          '</td>' +
+          '</tr>';
+
+      });
+
+
+      table +=
+        '</tbody>' +
+        '</table>' +
+        '</div>';
+
+
+      document.getElementById(
+        "metricsTable"
+      ).innerHTML = table;
+
+
+      /*
+       * Automatically update the results paragraph.
+       */
+
+      var ndcgModel =
+        d.metrics.model["ndcg@K"] ??
+        d.metrics.model["ndcg@100"] ??
+        d.metrics.model["ndcg"];
+
+      var ndcgBaseline =
+        d.metrics.baseline["ndcg@K"] ??
+        d.metrics.baseline["ndcg@100"] ??
+        d.metrics.baseline["ndcg"];
+
+
+      if(
+        typeof ndcgModel === "number" &&
+        typeof ndcgBaseline === "number"
+      ){
+
+        var gap =
+          ndcgModel -
+          ndcgBaseline;
+
+        var direction =
+          gap > 0
+            ? "outperformed"
+            : gap < 0
+              ? "underperformed"
+              : "matched";
+
+
+        document.getElementById(
+          "resultsText"
+        ).innerHTML =
+
+          "The model and the two-signal baseline were evaluated on the same held-out clients. " +
+
+          "The model " +
+          direction +
+          " the baseline on NDCG@K by " +
+          Math.abs(gap).toFixed(3) +
+          " (" +
+          ndcgModel.toFixed(3) +
+          " versus " +
+          ndcgBaseline.toFixed(3) +
+          "). " +
+
+          "The complete comparison is shown below using NDCG@100, Precision@100, and Spearman correlation where available. " +
+
+          "These results should be interpreted as directional evidence for review prioritization rather than proof of future performance or causal refresh impact.";
+
+      }
+
+
+      /*
+       * Shuffled-label check.
+       */
+
+      if(d.shuffled_label_check){
+
+        var sh =
+          d.shuffled_label_check;
+
+
+        document.getElementById(
+          "shuf"
+        ).innerHTML =
+
+          "<p><strong>Shuffled-label check:</strong> " +
+
+          Object.keys(sh)
+
+            .map(function(k){
+
+              var value =
+                Number(sh[k]);
+
+              return k +
+                " = " +
+                value.toFixed(3);
+
+            })
+
+            .join(", ") +
+
+          ".</p>";
+
+      }
+
+
+    })
+
+    .catch(function(){
+
+      /*
+       * Leave the empty state if the JSON file
+       * is not available when the HTML is opened.
+       */
+
+    });
+
+})();
+
+
+/*
+ * Scroll highlight for the contents list.
+ */
+
+(function(){
+
+  var links =
+    [].slice.call(
+      document.querySelectorAll(
+        "nav.toc a"
+      )
+    );
+
+
+  var secs =
+    links.map(function(a){
+
+      return document.querySelector(
+        a.getAttribute("href")
+      );
+
+    });
+
+
+  function on(){
+
+    var cur = 0;
+
+
+    secs.forEach(function(s,i){
+
+      if(
+        s &&
+        s.getBoundingClientRect().top < 140
+      ){
+
+        cur = i;
+
+      }
+
+    });
+
+
+    links.forEach(function(a,i){
+
+      a.classList.toggle(
+        "on",
+        i === cur
+      );
+
+    });
+
+  }
+
+
+  window.addEventListener(
+    "scroll",
+    on,
+    {
+      passive:true
+    }
+  );
+
+
+  on();
+
+})();
+
+</script>
+
+</body>
+</html>
